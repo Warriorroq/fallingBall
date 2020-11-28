@@ -133,14 +133,19 @@ int main()
 		if (clock.getElapsedTime().asSeconds() >= frameTime) {
 			draw = true;
 			pos += velocity;
-			velocity.y += gravity * frameTime;
+
+			if (pos.y < 390)
+					velocity.y += gravity * frameTime;
+
 			circle.setPosition(pos.x, pos.y);
 			clock.restart();
+ 
+			if (pos.y > 390) 
+				velocity.y *= -0.9f;
 
-			if (pos.y > 400) {
-				velocity = velocity2;
-				pos = pos2;
-			}
+			if (pos.x < -5 || pos.x > 790)
+				velocity.x *= -0.7f;
+			
 		}
 		else {
 			Time sleepTime = seconds((frameTime)-clock.getElapsedTime().asSeconds());
