@@ -144,8 +144,12 @@ int main()
 				velocity.y *= -0.9f;
 
 			if (pos.x < -5 || pos.x > 790)
-				velocity.x *= -0.7f;
-			
+				velocity.x *= -1;
+
+			if(velocity.x > 0)
+				velocity.x -= velocity2.x * frameTime/5.0f;
+			else 
+				velocity.x += velocity2.x * frameTime/5.0f;
 		}
 		else {
 			Time sleepTime = seconds((frameTime)-clock.getElapsedTime().asSeconds());
