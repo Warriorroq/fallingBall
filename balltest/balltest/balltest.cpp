@@ -120,7 +120,10 @@ int main()
 	}
 
 	myVector::Vector3 pos2 = pos;
+	velocity.x = abs(velocity.x);
 	myVector::Vector3 velocity2 = velocity;
+
+
 	velocity.PrintInfo();	
 
 	CircleShape circle(radius.x);
