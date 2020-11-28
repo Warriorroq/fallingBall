@@ -109,7 +109,11 @@ int main()
 		cin >> angle;
 
 		velocity.x = power * sinf(angle);
-		velocity.y = -power * cosf(angle);
+
+		if(angle < 45)
+			velocity.y = -power * cosf(angle);
+		else 
+			velocity.y = power * cosf(angle);
 	}
 
 
@@ -150,9 +154,9 @@ int main()
 				velocity.x *= -1;
 
 			if(velocity.x > 0)
-				velocity.x -= velocity2.x * frameTime/5.0f;
+				velocity.x -= velocity2.x / 10.0f * frameTime;
 			else 
-				velocity.x += velocity2.x * frameTime/5.0f;
+				velocity.x += velocity2.x / 10.0f * frameTime;
 		}
 		else {
 			Time sleepTime = seconds((frameTime)-clock.getElapsedTime().asSeconds());
