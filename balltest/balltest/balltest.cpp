@@ -197,6 +197,7 @@ int main()
 	cout << "how many balls you want (1<x<101)" << endl;
 	cin >> balls;
 	balls = abs(balls);
+	//Ball *bal = (Ball *)malloc(balls * sizeof(Ball));
 	Ball bal[100];
 	cout << "coms : 1 - random | 0 - my ball | 2 - random balls";
 	int a = 0;
@@ -247,7 +248,7 @@ int main()
 			window.display();
 		}
 	}
-
+	//free(bal);
 	return 0;
 }
 
