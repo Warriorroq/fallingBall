@@ -184,10 +184,6 @@ Ball CreateRandomBall() {
 	return Ball(pos, radius, velocity, color);
 }
 
-void AddBall(Ball &bal,Ball *bals,int &thisbal) {
-	bals[thisbal] = bal;
-	thisbal++;
-}
 int main()
 {
 	RenderWindow window(VideoMode(800, 400, 32), "Hello");
