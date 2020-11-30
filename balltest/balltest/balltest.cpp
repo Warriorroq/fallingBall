@@ -98,10 +98,10 @@ public:
 	}
 	void Move(float frameTime) {
 
-		if (position.y < 390)
+		if (position.y < 380)
 			velocity.y += gravity * frameTime;
 
-		if (position.y > 400)
+		if (position.y > 380)
 			velocity.y *= -0.9f;
 
 		if (position.x < -5 || position.x > 790)
@@ -134,7 +134,7 @@ Ball CreateBall() {
 	while (!(startPos >= 0 && startPos <= 380)) {
 		cout << "start Y: (>0 & <380)";
 		cin >> startPos;
-		pos.y = 380 - startPos;
+		pos.y = 360 - startPos;
 	}
 
 	while (power < 0) {
@@ -165,7 +165,7 @@ Ball CreateRandomBall() {
 	float radius = 10;
 	myVector::Vector3 color(255, 255, 255);
 
-	pos.y = 380 -abs( rand() % 360 + 20);
+	pos.y = 340 -abs( rand() % 360 + 20);
 
 	power = abs( rand() % 10) + 5;
 	color.x = abs(rand() % 255);
@@ -194,20 +194,29 @@ int main()
 
 	//////////////////////////////////////
 	int balls = 0;
-	cout << "how many balls you want (1<x<11)" << endl;
+	cout << "how many balls you want (1<x<101)" << endl;
 	cin >> balls;
 	balls = abs(balls);
-	Ball bal[12];
-	cout << "coms : 1 - random | 0 - my ball";
-	for(int i =0; i< balls;i++){
-		int a = 0;
-		cin >> a;
-		Ball baL;
-		if (a == 0)
-			baL = CreateBall();
-		else
+	Ball bal[100];
+	cout << "coms : 1 - random | 0 - my ball | 2 - random balls";
+	int a = 0;
+	cin >> a;
+	if(a != 2)
+		for(int i =0; i< balls;i++){
+			int a = 0;
+			cin >> a;
+			Ball baL;
+			if (a == 0)
+				baL = CreateBall();
+			else
+				baL = CreateRandomBall();
+			bal[i] = baL;}
+	else {
+		for (int i = 0; i < balls; i++) {
+			Ball baL;
 			baL = CreateRandomBall();
-		bal[i] = baL;
+			bal[i] = baL;
+		}
 	}
 	//////////////////////////////////////
 
