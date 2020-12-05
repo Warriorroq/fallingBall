@@ -3,6 +3,8 @@
 #include <string>
 #include <SFML/Graphics.hpp>
 #include <cstdlib>
+#include <stdlib.h>
+
 
 using namespace sf;
 
@@ -10,7 +12,7 @@ using namespace std;
 
 
 const float gravity = 9.8f;
-const float FPS = 75.0f;
+const float FPS = 80.0f;
 
 namespace myVector {
 	struct Vector3 {
@@ -18,37 +20,39 @@ namespace myVector {
 		double x;
 		double y;
 		double z;
-		Vector3(double x = 0, double y = 0, double z = 0, string name = "") : x(x), y(y), z(z), name(name) {
-			if (name.length() == 0)
-				SetRandomName();
-		}
+		Vector3(double x = 0, double y = 0, double z = 0) : x(x), y(y), z(z) 
+		{}
 
-		virtual void operator +=(Vector3 vec) {
+		Vector3& operator +=(Vector3& vec) {
 			x += vec.x;
 			y += vec.y;
-			z += vec.z;
+			z += vec.z;		
+			return *this;
 		}
 
-		virtual void operator -=(Vector3 vec) {
+		Vector3& operator -=(Vector3& vec) {
 			x -= vec.x;
 			y -= vec.y;
 			z -= vec.z;
+			return *this;
 		}
 
-		virtual bool operator ==(Vector3 vec) {
+		bool operator ==(Vector3& vec) {
 			return (x == vec.x && y == vec.y && z == vec.z);
 		}
 
-		virtual void operator *=(double vec) {
+		Vector3& operator *=(double vec) {
 			x *= vec;
 			y *= vec;
-			z *= vec;
+			z *= vec;			
+			return *this;
 		}
 
-		virtual void operator /=(double vec) {
+		Vector3& operator /=(double vec) {
 			x /= vec;
 			y /= vec;
 			z /= vec;
+			return *this;
 		}
 
 		double Length() {
@@ -61,47 +65,29 @@ namespace myVector {
 			y /= l;
 			z /= l;
 		}
-
-		string GetName() {
-			return name;
-		}
-
-		void SetName(string name) {
-			this->name = name;
-		}
-
 		void PrintInfo() {
-			cout << "Name : " << name << endl;
 			cout << "Vector :" << "(" << x << "," << y << "," << z << ")" << endl;
 			cout << "Lenght : " << Length() << endl;
-
-		}
-
-	private:
-		string name;
-		void SetRandomName() {
-			this->name = "vector " + to_string(rand() % 15);
 		}
 	};
 }
-struct Ball {
+class Ball {
 public:
 	myVector::Vector3 velocity;
 	myVector::Vector3 position;
 	myVector::Vector3 color;
-	CircleShape circle;
+	CircleShape* circle;
 	Ball(myVector::Vector3 position = myVector::Vector3(0, 0), double raduis = 10, myVector::Vector3 velocity = myVector::Vector3(0, 0), myVector::Vector3 color = myVector::Vector3(255, 255, 255)) : position(position), velocity(velocity),color(color){
-		circle = CircleShape(raduis);
-		circle.setPosition(this->position.x, this->position.y);
-		circle.setFillColor(Color(this->color.x, this->color.y, this->color.z));
-		velocity2 = this->velocity;
+		circle = new CircleShape((float)raduis);
+		circle->setPosition((float)position.x, (float)position.y);
+		circle->setFillColor(Color((Uint8)color.x, (Uint8)color.y, (Uint8)color.z));
+		velocity2 = velocity;
 	}
-	void Move(float frameTime) {
+	void Move(double frameTime) {
 
 		if (position.y < 380)
 			velocity.y += gravity * frameTime;
-
-		if (position.y > 380)
+		else 
 			velocity.y *= -0.9f;
 
 		if (position.x < -5 || position.x > 790)
@@ -114,16 +100,16 @@ public:
 
 		position += velocity;
 
-		circle.setPosition(this->position.x, this->position.y);
+		circle->setPosition((float)position.x, (float)position.y);
 	}
 private:
 	myVector::Vector3 velocity2;
 };
 
 Ball CreateBall() {
-	float power = -1;
-	float angle = 100;
-	float startPos = -1;
+	float power = -1.0f;
+	float angle = 100.0f;
+	float startPos = -1.0f;
 
 	myVector::Vector3 pos(0, 0);
 	myVector::Vector3 velocity(0, 0);
@@ -156,17 +142,16 @@ Ball CreateBall() {
 	return Ball(pos, radius, velocity, color);
 }
 Ball CreateRandomBall() {
-	float power = -1;
-	float angle = 100;
-	float startPos = -1;
+	float power = -1.0f;
+	float angle = 100.0f;
+	float startPos = -1.0f;
 
 	myVector::Vector3 pos(0, 0);
 	myVector::Vector3 velocity(0, 0);
 	float radius = 10;
 	myVector::Vector3 color(255, 255, 255);
 
-	pos.y = 340 -abs( rand() % 360 + 20);
-
+	pos.y = 340 - abs( rand() % 360 + 20);
 	power = abs( rand() % 10) + 5;
 	color.x = abs(rand() % 255);
 	color.y = abs(rand() % 255);
@@ -186,37 +171,36 @@ Ball CreateRandomBall() {
 
 int main()
 {
-	RenderWindow window(VideoMode(800, 400, 32), "Hello");
+	RenderWindow window(VideoMode(800, 400, 512), "Balls dance");
 	Clock clock;
 	Event ev;
 	float frameTime = 1.0f / FPS;
 	bool draw = true;
 
 	//////////////////////////////////////
-	int balls = 0;
-	cout << "how many balls you want (1<x<101)" << endl;
-	cin >> balls;
-	balls = abs(balls);
-	//Ball *bal = (Ball *)malloc(balls * sizeof(Ball));
-	Ball bal[100];
+	int countofballs = 0;
+	cout << "how many balls you want" << endl;
+	cin >> countofballs;
+	countofballs = abs(countofballs);
+
+	Ball *arrbals = (Ball*)malloc(countofballs * sizeof(Ball));
 	cout << "coms : 1 - random | 0 - my ball | 2 - random balls";
-	int a = 0;
-	cin >> a;
-	if(a != 2)
-		for(int i =0; i< balls;i++){
-			int a = 0;
-			cin >> a;
-			Ball baL;
-			if (a == 0)
-				baL = CreateBall();
+	int command = 0;
+	cin >> command;
+	if (command != 2)
+	{
+		for (int i = 0; i < countofballs; i++) {
+			cin >> command;
+			if (command == 0)
+				arrbals[i] = CreateBall();
 			else
-				baL = CreateRandomBall();
-			bal[i] = baL;}
-	else {
-		for (int i = 0; i < balls; i++) {
-			Ball baL;
-			baL = CreateRandomBall();
-			bal[i] = baL;
+				arrbals[i] = CreateRandomBall();
+		}
+	}
+	else 
+	{
+		for (int i = 0; i < countofballs; i++) {
+			arrbals[i] = CreateRandomBall();
 		}
 	}
 	//////////////////////////////////////
@@ -226,8 +210,9 @@ int main()
 		if (clock.getElapsedTime().asSeconds() >= frameTime) {
 			draw = true;
 			clock.restart();
-			for (int i = 0; i < balls; i++) 
-				bal[i].Move(frameTime);
+			for (int i = 0; i < countofballs; i++) 
+
+				arrbals[i].Move(frameTime);
 		}
 		else {
 			Time sleepTime = seconds((frameTime)-clock.getElapsedTime().asSeconds());
@@ -241,14 +226,14 @@ int main()
 		if (draw) {
 			draw = false;
 			window.clear(Color::Black);
-			for (int i = 0; i < balls; i++) {
-				window.draw(bal[i].circle);
+			for (int i = 0; i < countofballs; i++) {
+				window.draw(*(arrbals[i].circle));
 			}
 
 			window.display();
 		}
 	}
-	//free(bal);
+	free(arrbals);
 	return 0;
 }
 
