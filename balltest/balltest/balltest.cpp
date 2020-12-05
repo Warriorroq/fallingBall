@@ -77,30 +77,36 @@ public:
 	myVector::Vector3 position;
 	myVector::Vector3 color;
 	CircleShape* circle;
+	bool move = true;
 	Ball(myVector::Vector3 position = myVector::Vector3(0, 0), double raduis = 10, myVector::Vector3 velocity = myVector::Vector3(0, 0), myVector::Vector3 color = myVector::Vector3(255, 255, 255)) : position(position), velocity(velocity),color(color){
 		circle = new CircleShape((float)raduis);
 		circle->setPosition((float)position.x, (float)position.y);
 		circle->setFillColor(Color((Uint8)color.x, (Uint8)color.y, (Uint8)color.z));
 		velocity2 = velocity;
 	}
+	void ChangeMove() {
+		move = !move;
+	}
 	void Move(double frameTime) {
 
-		if (position.y < 380)
-			velocity.y += gravity * frameTime;
-		else 
-			velocity.y *= -0.9f;
+		if (move) {
+			if (position.y < 380)
+				velocity.y += gravity * frameTime;
+			else
+				velocity.y *= -0.9f;
 
-		if (position.x < -5 || position.x > 790)
-			velocity.x *= -1;
+			if (position.x < -5 || position.x > 790)
+				velocity.x *= -1;
 
-		if (velocity.x > 0)
-			velocity.x -= velocity2.x / 10.0f * frameTime;
-		else
-			velocity.x += velocity2.x / 10.0f * frameTime;
+			if (velocity.x > 0)
+				velocity.x -= velocity2.x / 10.0f * frameTime;
+			else
+				velocity.x += velocity2.x / 10.0f * frameTime;
 
-		position += velocity;
+			position += velocity;
 
-		circle->setPosition((float)position.x, (float)position.y);
+			circle->setPosition((float)position.x, (float)position.y);
+		}
 	}
 private:
 	myVector::Vector3 velocity2;
@@ -171,7 +177,7 @@ Ball CreateRandomBall() {
 
 int main()
 {
-	RenderWindow window(VideoMode(800, 400, 512), "Balls dance");
+	RenderWindow window(VideoMode(840, 480, 512), "Balls dance");
 	Clock clock;
 	Event ev;
 	float frameTime = 1.0f / FPS;
@@ -197,11 +203,11 @@ int main()
 				arrbals[i] = CreateRandomBall();
 		}
 	}
-	else 
+	else
 	{
-		for (int i = 0; i < countofballs; i++) {
+		for (int i = 0; i < countofballs; i++)
 			arrbals[i] = CreateRandomBall();
-		}
+
 	}
 	//////////////////////////////////////
 
@@ -210,8 +216,7 @@ int main()
 		if (clock.getElapsedTime().asSeconds() >= frameTime) {
 			draw = true;
 			clock.restart();
-			for (int i = 0; i < countofballs; i++) 
-
+			for (int i = 0; i < countofballs; i++)
 				arrbals[i].Move(frameTime);
 		}
 		else {
@@ -221,6 +226,15 @@ int main()
 
 		while (window.pollEvent(ev)) {
 			if (ev.type == Event::Closed) window.close();
+
+			if (ev.type == Event::MouseButtonPressed)
+				for (int i = 0; i < countofballs; i++)
+					arrbals[i].ChangeMove();
+			if (ev.type == Event::MouseWheelScrolled) {
+				if (countofballs > 10)
+					countofballs -= countofballs / 10;
+				realloc(arrbals, countofballs * sizeof(Ball));
+			}
 		}
 
 		if (draw) {
@@ -229,7 +243,6 @@ int main()
 			for (int i = 0; i < countofballs; i++) {
 				window.draw(*(arrbals[i].circle));
 			}
-
 			window.display();
 		}
 	}
