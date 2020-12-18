@@ -5,7 +5,6 @@
 #include <cstdlib>
 #include <stdlib.h>
 
-
 using namespace sf;
 
 using namespace std;
@@ -182,6 +181,7 @@ int main()
 	Event ev;
 	float frameTime = 1.0f / FPS;
 	bool draw = true;
+	string path = "../../output.xml";
 
 	//////////////////////////////////////
 	int countofballs = 0;
@@ -202,6 +202,10 @@ int main()
 			else
 				arrbals[i] = CreateRandomBall();
 		}
+	}
+	else if (command == 3) 
+	{
+		//load balls 
 	}
 	else
 	{
@@ -227,9 +231,9 @@ int main()
 		while (window.pollEvent(ev)) {
 			if (ev.type == Event::Closed) window.close();
 
-			if (ev.type == Event::MouseButtonPressed)
-				for (int i = 0; i < countofballs; i++)
-					arrbals[i].ChangeMove();
+			if (ev.type == Event::MouseButtonPressed) {
+				//save balls
+			}
 			if (ev.type == Event::MouseWheelScrolled) {
 				if (countofballs > 10)
 					countofballs -= countofballs / 10;
