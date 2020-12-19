@@ -4,11 +4,13 @@
 #include <SFML/Graphics.hpp>
 #include <cstdlib>
 #include <stdlib.h>
+#include <stdio.h>
+#include "json.hpp"
+#include <fstream>
 
 using namespace sf;
-
 using namespace std;
-
+using json = nlohmann::json;
 
 const float gravity = 9.8f;
 const float FPS = 80.0f;
@@ -76,36 +78,32 @@ public:
 	myVector::Vector3 position;
 	myVector::Vector3 color;
 	CircleShape* circle;
-	bool move = true;
 	Ball(myVector::Vector3 position = myVector::Vector3(0, 0), double raduis = 10, myVector::Vector3 velocity = myVector::Vector3(0, 0), myVector::Vector3 color = myVector::Vector3(255, 255, 255)) : position(position), velocity(velocity),color(color){
 		circle = new CircleShape((float)raduis);
 		circle->setPosition((float)position.x, (float)position.y);
 		circle->setFillColor(Color((Uint8)color.x, (Uint8)color.y, (Uint8)color.z));
 		velocity2 = velocity;
 	}
-	void ChangeMove() {
-		move = !move;
+	void UpdateColor() {
+		circle->setFillColor(Color((Uint8)color.x, (Uint8)color.y, (Uint8)color.z));
 	}
-	void Move(double frameTime) {
+	void Move(double frameTime) 
+	{
+		if (position.y < 380)
+			velocity.y += gravity * frameTime;
+		else
+			velocity.y *= -0.9f;
+		if (position.x < -5 || position.x > 790)
+			velocity.x *= -1;
 
-		if (move) {
-			if (position.y < 380)
-				velocity.y += gravity * frameTime;
-			else
-				velocity.y *= -0.9f;
+		if (velocity.x > 0)
+			velocity.x -= velocity2.x / 10.0f * frameTime;
+		else
+			velocity.x += velocity2.x / 10.0f * frameTime;
 
-			if (position.x < -5 || position.x > 790)
-				velocity.x *= -1;
+		position += velocity;
 
-			if (velocity.x > 0)
-				velocity.x -= velocity2.x / 10.0f * frameTime;
-			else
-				velocity.x += velocity2.x / 10.0f * frameTime;
-
-			position += velocity;
-
-			circle->setPosition((float)position.x, (float)position.y);
-		}
+		circle->setPosition((float)position.x, (float)position.y);
 	}
 private:
 	myVector::Vector3 velocity2;
@@ -173,7 +171,42 @@ Ball CreateRandomBall() {
 
 	return Ball(pos, radius, velocity, color);
 }
+void To_Json(json &Json,Ball &ball,int &position) {
+	Json[position]["Velocity"]["x"] = ball.velocity.x;
+	Json[position]["Velocity"]["y"] = ball.velocity.y;
 
+	Json[position]["Position"]["x"] = ball.position.x;
+	Json[position]["Position"]["y"] = ball.position.y;
+
+	Json[position]["Color"]["x"] = ball.position.x;
+	Json[position]["Color"]["y"] = ball.color.y;
+	Json[position]["Color"]["z"] = ball.color.z;
+	ofstream fout;
+	fout.open("file.json");
+	fout << Json;
+	fout.close();
+}
+void Load_Json(int &count, Ball* bals) {
+
+	ifstream file("file.json");
+	json myJson = json::parse(file);
+	for (int i = 0; i < count; i++)
+	{
+		Ball bal = Ball();
+		bal.velocity.x = myJson[i]["Velocity"]["x"];
+		bal.velocity.y = myJson[i]["Velocity"]["y"];
+
+		bal.position.x = myJson[i]["Position"]["x"];
+		bal.position.y = myJson[i]["Position"]["y"];
+
+		bal.color.x = myJson[i]["Color"]["x"];
+		bal.color.y = myJson[i]["Color"]["y"];
+		bal.color.z = myJson[i]["Color"]["z"];
+		bal.UpdateColor();
+		bals[i] = bal;
+	}
+	file.close();
+}
 int main()
 {
 	RenderWindow window(VideoMode(840, 480, 512), "Balls dance");
@@ -181,7 +214,6 @@ int main()
 	Event ev;
 	float frameTime = 1.0f / FPS;
 	bool draw = true;
-	string path = "../../output.xml";
 
 	//////////////////////////////////////
 	int countofballs = 0;
@@ -190,22 +222,18 @@ int main()
 	countofballs = abs(countofballs);
 
 	Ball *arrbals = (Ball*)malloc(countofballs * sizeof(Ball));
+	json myJson;
 	cout << "coms : 1 - random | 0 - my ball | 2 - random balls";
 	int command = 0;
 	cin >> command;
-	if (command != 2)
+	if (command == 2)
 	{
-		for (int i = 0; i < countofballs; i++) {
-			cin >> command;
-			if (command == 0)
-				arrbals[i] = CreateBall();
-			else
-				arrbals[i] = CreateRandomBall();
-		}
+		for (int i = 0; i < countofballs; i++)
+			arrbals[i] = CreateRandomBall();
 	}
 	else if (command == 3) 
 	{
-		//load balls 
+		Load_Json(countofballs,arrbals);
 	}
 	else
 	{
@@ -232,7 +260,10 @@ int main()
 			if (ev.type == Event::Closed) window.close();
 
 			if (ev.type == Event::MouseButtonPressed) {
-				//save balls
+				for (int i = 0; i < countofballs; i++)
+				{
+					To_Json(myJson,arrbals[i],i);
+				}
 			}
 			if (ev.type == Event::MouseWheelScrolled) {
 				if (countofballs > 10)
